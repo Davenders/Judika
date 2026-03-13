@@ -8,7 +8,7 @@ const routes = [
     keywords: ["kontakt", "telefon", "sprechzeiten"],
     hint: "Informationen zum Kontakt des Landesgerichts Falkenheim finden Sie im Bereich „Kontakt“ der Website.",
     linkText: "Zur Kontaktseite",
-    href: "#kontakt"
+    href: "https://discord.gg/D3NNuyJUre"
   },
   {
     keywords: ["organisation", "aufbau", "abteilungen"],
