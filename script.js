@@ -2,12 +2,12 @@ const chatForm = document.getElementById("chat-form");
 const chatInput = document.getElementById("chat-input");
 const chatLog = document.getElementById("chat-log");
 
-// einfache Keyword-Router für "Weiterleitung"
+// Weiterleitungs-Router
 const routes = [
   {
     keywords: ["kontakt", "telefon", "sprechzeiten"],
-    hint: "Informationen zum Kontakt des Landesgerichts Falkenheim finden Sie im Bereich „Kontakt“ der Website.",
-    linkText: "Zur Kontaktseite",
+    hint: "Sie erreichen den Kontakt des Landesgerichts Falkenheim jetzt über unseren Discord‑Server.",
+    linkText: "Zum Discord",
     href: "https://discord.gg/D3NNuyJUre"
   },
   {
@@ -23,11 +23,6 @@ const routes = [
     href: "#rechtsprechung"
   }
 ];
-
-const systemNotice =
-  "Hinweis: Judika darf ausschließlich Informationen aus dem Gesetzbuch Falkenheim " +
-  "und den Inhalten der Website des Landesgerichts Falkenheim verwenden. " +
-  "Sie ersetzt keine Rechtsberatung und ist nicht für reale Gesetzbücher der Bundesrepublik Deutschland zugelassen.";
 
 function appendMessage(author, text, type = "judika") {
   const wrapper = document.createElement("div");
@@ -76,32 +71,51 @@ function appendLinkHint(hint, linkText, href) {
   chatLog.scrollTop = chatLog.scrollHeight;
 }
 
+// KI-Antwort erzeugen
+async function generateAIAnswer(question) {
+  appendMessage("Judika", "Einen Moment, ich denke nach …", "judika");
+
+  try {
+    const response = await fetch("http://localhost:1234/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "your-model-name",
+        messages: [
+          { role: "system", content: "Du bist Judika, eine sachliche, höfliche Assistentin." },
+          { role: "user", content: question }
+        ]
+      })
+    });
+
+    const data = await response.json();
+    const answer = data.choices?.[0]?.message?.content || "Ich konnte keine Antwort generieren.";
+
+    appendMessage("Judika", answer, "judika");
+
+  } catch (err) {
+    appendMessage("Judika", "Es gab ein Problem beim Generieren der Antwort.", "judika");
+  }
+}
+
 function handleUserQuestion(question) {
   const q = question.toLowerCase();
 
-  // einfache Weiterleitungslogik
+  // Weiterleitungslogik
   for (const route of routes) {
     if (route.keywords.some((k) => q.includes(k))) {
       appendLinkHint(route.hint, route.linkText, route.href);
       appendMessage(
         "Judika",
-        "Bitte beachten Sie: Für verbindliche Auskünfte wenden Sie sich an das zuständige Personal des Landesgerichts Falkenheim.",
+        "Wenn Sie weitere Fragen haben, helfe ich Ihnen gerne weiter.",
         "judika"
       );
       return;
     }
   }
 
-  // generische Antwort – hier könntest du später Gemini / API einbauen
-  appendMessage(
-    "Judika",
-    "Ich kann Ihre Frage nur im Rahmen des Falkenheim‑Gesetzbuchs beantworten. " +
-      "Bitte prüfen Sie den entsprechenden Paragraphen im Gesetzbuch Falkenheim oder konkretisieren Sie Ihre Frage. " +
-      "Bei komplexen oder individuellen Anliegen wenden Sie sich bitte direkt an das Personal des Landesgerichts Falkenheim.",
-    "judika"
-  );
-
-  appendMessage("Hinweis", systemNotice, "judika");
+  // KI-Antwort
+  generateAIAnswer(question);
 }
 
 chatForm.addEventListener("submit", (e) => {
