@@ -71,30 +71,44 @@ function appendLinkHint(hint, linkText, href) {
   chatLog.scrollTop = chatLog.scrollHeight;
 }
 
-// KI-Antwort erzeugen
+// KI-Antwort über Google Gemini API
 async function generateAIAnswer(question) {
   appendMessage("Judika", "Einen Moment, ich denke nach …", "judika");
 
   try {
-    const response = await fetch("http://localhost:1234/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "your-model-name",
-        messages: [
-          { role: "system", content: "Du bist Judika, eine sachliche, höfliche Assistentin." },
-          { role: "user", content: question }
-        ]
-      })
-    });
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyC5h7wP122ADNnVtifmEsrFb-BXf3FRpPQ",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text:
+                    "Du bist Judika, eine sachliche, höfliche Assistentin des Landesgerichts Falkenheim. Antworte klar, hilfreich und ohne rechtliche Haftung."
+                },
+                { text: question }
+              ]
+            }
+          ]
+        })
+      }
+    );
 
     const data = await response.json();
-    const answer = data.choices?.[0]?.message?.content || "Ich konnte keine Antwort generieren.";
+    const answer =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "Ich konnte keine Antwort generieren.";
 
     appendMessage("Judika", answer, "judika");
-
   } catch (err) {
-    appendMessage("Judika", "Es gab ein Problem beim Generieren der Antwort.", "judika");
+    appendMessage(
+      "Judika",
+      "Es gab ein Problem beim Generieren der Antwort.",
+      "judika"
+    );
   }
 }
 
@@ -114,7 +128,7 @@ function handleUserQuestion(question) {
     }
   }
 
-  // KI-Antwort
+  // KI-Antwort generieren
   generateAIAnswer(question);
 }
 
