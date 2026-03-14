@@ -71,31 +71,12 @@ function appendLinkHint(hint, linkText, href) {
   chatLog.scrollTop = chatLog.scrollHeight;
 }
 
-// KI-Antwort über Ollama (llama3)
+// *** Juristisch formulierte Standardantwort ***
 async function generateAIAnswer(question) {
-  appendMessage("Judika", "Einen Moment, ich denke nach …", "judika");
+  const fixedAnswer =
+    "Derzeit kann ich leider keine Antwort geben. Wenden Sie sich bitte über den E‑Mail‑Verteiler an die zuständige Fachperson. Diese wird Ihre Anfrage prüfen und entsprechend beantworten. Sollten Sie noch nicht in den E‑Mail‑Verteiler aufgenommen sein, können Sie diesem über den Menüpunkt „Kontakt“ beitreten.";
 
-  try {
-    const response = await fetch("http://localhost:11434/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "llama3",
-        messages: [
-          { role: "system", content: "Du bist Judika, eine sachliche, höfliche Assistentin des Landesgerichts Falkenheim." },
-          { role: "user", content: question }
-        ]
-      })
-    });
-
-    const data = await response.json();
-    const answer = data.message?.content || "Ich konnte keine Antwort generieren.";
-
-    appendMessage("Judika", answer, "judika");
-
-  } catch (err) {
-    appendMessage("Judika", "Es gab ein Problem beim Generieren der Antwort.", "judika");
-  }
+  appendMessage("Judika", fixedAnswer, "judika");
 }
 
 function handleUserQuestion(question) {
@@ -114,7 +95,7 @@ function handleUserQuestion(question) {
     }
   }
 
-  // KI-Antwort generieren
+  // Feste juristische Antwort ausgeben
   generateAIAnswer(question);
 }
 
